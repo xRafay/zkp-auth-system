@@ -1,0 +1,30 @@
+
+import time
+import secrets
+import matplotlib.pyplot as plt
+from argon2.low_level import hash_secret, Type
+
+def measure_argon2_time(memory_cost):
+    start = time.time()
+    salt = secrets.token_bytes(16)
+    hash_secret(
+        b"testpass",
+        salt,
+        time_cost=3,
+        memory_cost=memory_cost,
+        parallelism=4,
+        hash_len=32,
+        type=Type.ID
+    )
+    return time.time() - start
+
+memory_costs = [16*1024, 32*1024, 64*1024, 128*1024]
+times = [measure_argon2_time(mc) for mc in memory_costs]
+
+plt.plot(memory_costs, times, marker='o')
+plt.xlabel('Memory Cost (KB)')
+plt.ylabel('Hashing Time (seconds)')
+plt.title('Argon2 Hashing Performance')
+plt.grid(True)
+plt.savefig('argon2_performance.png')
+plt.show()
